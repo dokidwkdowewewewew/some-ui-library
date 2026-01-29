@@ -199,6 +199,8 @@ function UI.AddTab(name, icon)
 	return {
 		Section = section,
 		AddGroup = function(_, title)
+			title = title or "group"
+			
 			local group = create("Frame", {
 				Name = title,
 				Size = UDim2.new(1, 0, 0, 0),
