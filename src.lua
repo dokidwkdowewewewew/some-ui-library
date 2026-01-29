@@ -40,16 +40,6 @@ local function create(class, props)
 	return obj
 end
 
-local function makeSquare(parent, size, color, filled)
-	return create("Frame", {
-		Size = UDim2.new(0, size, 0, size),
-		BackgroundColor3 = filled and color or Color3.fromRGB(15, 15, 15),
-		BorderColor3 = color,
-		BorderSizePixel = 1,
-		Parent = parent,
-	})
-end
-
 function Library:CreateWindow(config)
 	config = config or {}
 	local title = config.Name or "UI"
@@ -59,6 +49,7 @@ function Library:CreateWindow(config)
 		Parent = game.CoreGui,
 		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 		IgnoreGuiInset = true,
+		ResetOnSpawn = false,
 	})
 	
 	mainFrame = create("Frame", {
@@ -98,6 +89,13 @@ function Library:CreateWindow(config)
 		Parent = mainFrame,
 	})
 	
+	create("UIListLayout", {
+		FillDirection = Enum.FillDirection.Vertical,
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		Padding = UDim.new(0, 0),
+		Parent = sidebar,
+	})
+	
 	contentFrame = create("ScrollingFrame", {
 		Name = "Content",
 		Size = UDim2.new(1, -50, 1, -35),
@@ -112,13 +110,16 @@ function Library:CreateWindow(config)
 	})
 	
 	create("UIListLayout", {
-		Padding = UDim.new(0, 10),
+		FillDirection = Enum.FillDirection.Vertical,
 		SortOrder = Enum.SortOrder.LayoutOrder,
+		Padding = UDim.new(0, 10),
 		Parent = contentFrame,
 	})
 	
 	create("UIPadding", {
 		PaddingTop = UDim.new(0, 10),
+		PaddingLeft = UDim.new(0, 10),
+		PaddingRight = UDim.new(0, 10),
 		Parent = contentFrame,
 	})
 	
@@ -149,13 +150,18 @@ function Library:CreateWindow(config)
 	end)
 	
 	local Window = {}
+	local tabIndex = 0
 	
 	function Window:CreateTab(config)
 		config = config or {}
 		local name = config.Name or "Tab"
 		local icon = config.Icon or "🐱"
 		
+		tabIndex = tabIndex + 1
+		local currentTabIndex = tabIndex
+		
 		local btn = create("TextButton", {
+			Name = name,
 			Size = UDim2.new(1, 0, 0, 50),
 			BackgroundColor3 = theme.secondary,
 			BorderSizePixel = 0,
@@ -163,30 +169,36 @@ function Library:CreateWindow(config)
 			TextColor3 = theme.textDark,
 			Font = Enum.Font.Code,
 			TextSize = 20,
+			LayoutOrder = currentTabIndex,
 			Parent = sidebar,
 		})
 		
 		local section = create("Frame", {
 			Name = name,
-			Size = UDim2.new(1, -20, 0, 0),
-			Position = UDim2.new(0, 10, 0, 0),
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundTransparency = 1,
 			Visible = false,
+			LayoutOrder = currentTabIndex,
 			Parent = contentFrame,
 		})
 		
 		create("UIListLayout", {
-			Padding = UDim.new(0, 8),
+			FillDirection = Enum.FillDirection.Vertical,
 			SortOrder = Enum.SortOrder.LayoutOrder,
+			Padding = UDim.new(0, 10),
 			Parent = section,
 		})
 		
 		btn.MouseButton1Click:Connect(function()
-			if currentSection then
-				currentSection.Visible = false
+			for _, child in contentFrame:GetChildren() do
+				if child:IsA("Frame") then
+					child.Visible = false
+				end
 			end
 			section.Visible = true
 			currentSection = section
+			
 			for _, child in sidebar:GetChildren() do
 				if child:IsA("TextButton") then
 					child.TextColor3 = theme.textDark
@@ -202,61 +214,82 @@ function Library:CreateWindow(config)
 		end
 		
 		local Tab = {}
+		local sectionIndex = 0
 		
 		function Tab:CreateSection(config)
 			config = config or {}
-			local title = config.Name or "Section"
+			local sectionTitle = config.Name or "Section"
+			
+			sectionIndex = sectionIndex + 1
+			local currentSectionIndex = sectionIndex
 			
 			local group = create("Frame", {
-				Name = title,
+				Name = sectionTitle,
 				Size = UDim2.new(1, 0, 0, 0),
-				BackgroundTransparency = 1,
 				AutomaticSize = Enum.AutomaticSize.Y,
+				BackgroundTransparency = 1,
+				LayoutOrder = currentSectionIndex,
 				Parent = section,
 			})
 			
 			create("TextLabel", {
+				Name = "Title",
 				Size = UDim2.new(1, 0, 0, 20),
 				BackgroundTransparency = 1,
-				Text = tostring(title):upper(),
+				Text = tostring(sectionTitle):upper(),
 				TextColor3 = theme.text,
 				Font = Enum.Font.Code,
 				TextSize = 12,
 				TextXAlignment = Enum.TextXAlignment.Left,
+				LayoutOrder = 0,
 				Parent = group,
 			})
 			
 			local container = create("Frame", {
 				Name = "Container",
 				Size = UDim2.new(1, 0, 0, 0),
-				Position = UDim2.new(0, 0, 0, 25),
-				BackgroundTransparency = 1,
 				AutomaticSize = Enum.AutomaticSize.Y,
+				BackgroundTransparency = 1,
+				LayoutOrder = 1,
 				Parent = group,
 			})
 			
 			create("UIListLayout", {
-				Padding = UDim.new(0, 5),
+				FillDirection = Enum.FillDirection.Vertical,
 				SortOrder = Enum.SortOrder.LayoutOrder,
+				Padding = UDim.new(0, 5),
+				Parent = container,
+			})
+			
+			create("UIPadding", {
+				PaddingTop = UDim.new(0, 5),
 				Parent = container,
 			})
 			
 			local Section = {}
+			local elementIndex = 0
+			
+			local function getNextOrder()
+				elementIndex = elementIndex + 1
+				return elementIndex
+			end
 			
 			function Section:CreateButton(config)
 				config = config or {}
-				local name = config.Name or "Button"
+				local btnName = config.Name or "Button"
 				local callback = config.Callback or function() end
 				
 				local btnFrame = create("TextButton", {
+					Name = btnName,
 					Size = UDim2.new(1, 0, 0, 25),
 					BackgroundColor3 = theme.secondary,
 					BorderColor3 = theme.border,
 					BorderSizePixel = 1,
-					Text = name,
+					Text = btnName,
 					TextColor3 = theme.text,
 					Font = Enum.Font.Code,
 					TextSize = 11,
+					LayoutOrder = getNextOrder(),
 					Parent = container,
 				})
 				
@@ -265,24 +298,32 @@ function Library:CreateWindow(config)
 			
 			function Section:CreateToggle(config)
 				config = config or {}
-				local name = config.Name or "Toggle"
+				local toggleName = config.Name or "Toggle"
 				local default = config.CurrentValue or false
 				local callback = config.Callback or function() end
 				
 				local toggleFrame = create("Frame", {
+					Name = toggleName,
 					Size = UDim2.new(1, 0, 0, 20),
 					BackgroundTransparency = 1,
+					LayoutOrder = getNextOrder(),
 					Parent = container,
 				})
 				
-				local checkbox = makeSquare(toggleFrame, 12, theme.accent, default)
-				checkbox.Position = UDim2.new(0, 0, 0.5, -6)
+				local checkbox = create("Frame", {
+					Size = UDim2.new(0, 12, 0, 12),
+					Position = UDim2.new(0, 0, 0.5, -6),
+					BackgroundColor3 = default and theme.accent or Color3.fromRGB(15, 15, 15),
+					BorderColor3 = theme.accent,
+					BorderSizePixel = 1,
+					Parent = toggleFrame,
+				})
 				
 				create("TextLabel", {
 					Size = UDim2.new(1, -20, 1, 0),
 					Position = UDim2.new(0, 20, 0, 0),
 					BackgroundTransparency = 1,
-					Text = name,
+					Text = toggleName,
 					TextColor3 = theme.text,
 					Font = Enum.Font.Code,
 					TextSize = 11,
@@ -314,22 +355,24 @@ function Library:CreateWindow(config)
 			
 			function Section:CreateSlider(config)
 				config = config or {}
-				local name = config.Name or "Slider"
+				local sliderName = config.Name or "Slider"
 				local min = config.Min or 0
 				local max = config.Max or 100
 				local default = config.CurrentValue or 50
 				local callback = config.Callback or function() end
 				
 				local sliderFrame = create("Frame", {
-					Size = UDim2.new(1, 0, 0, 35),
+					Name = sliderName,
+					Size = UDim2.new(1, 0, 0, 40),
 					BackgroundTransparency = 1,
+					LayoutOrder = getNextOrder(),
 					Parent = container,
 				})
 				
 				create("TextLabel", {
-					Size = UDim2.new(1, 0, 0, 15),
+					Size = UDim2.new(1, -60, 0, 15),
 					BackgroundTransparency = 1,
-					Text = name,
+					Text = sliderName,
 					TextColor3 = theme.text,
 					Font = Enum.Font.Code,
 					TextSize = 11,
@@ -337,24 +380,9 @@ function Library:CreateWindow(config)
 					Parent = sliderFrame,
 				})
 				
-				local sliderBg = create("Frame", {
-					Size = UDim2.new(1, -60, 0, 3),
-					Position = UDim2.new(0, 0, 0, 23),
-					BackgroundColor3 = theme.secondary,
-					BorderSizePixel = 0,
-					Parent = sliderFrame,
-				})
-				
-				local sliderFill = create("Frame", {
-					Size = UDim2.new(0, 0, 1, 0),
-					BackgroundColor3 = theme.accent,
-					BorderSizePixel = 0,
-					Parent = sliderBg,
-				})
-				
 				local valueLabel = create("TextLabel", {
 					Size = UDim2.new(0, 50, 0, 15),
-					Position = UDim2.new(1, -50, 0, 18),
+					Position = UDim2.new(1, -50, 0, 0),
 					BackgroundTransparency = 1,
 					Text = tostring(default),
 					TextColor3 = theme.textDark,
@@ -362,6 +390,21 @@ function Library:CreateWindow(config)
 					TextSize = 10,
 					TextXAlignment = Enum.TextXAlignment.Right,
 					Parent = sliderFrame,
+				})
+				
+				local sliderBg = create("Frame", {
+					Size = UDim2.new(1, 0, 0, 4),
+					Position = UDim2.new(0, 0, 1, -10),
+					BackgroundColor3 = theme.secondary,
+					BorderSizePixel = 0,
+					Parent = sliderFrame,
+				})
+				
+				local sliderFill = create("Frame", {
+					Size = UDim2.new((default - min) / (max - min), 0, 1, 0),
+					BackgroundColor3 = theme.accent,
+					BorderSizePixel = 0,
+					Parent = sliderBg,
 				})
 				
 				local value = default
@@ -393,29 +436,30 @@ function Library:CreateWindow(config)
 						update(input)
 					end
 				end)
-				
-				sliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
 			end
 			
 			function Section:CreateDropdown(config)
 				config = config or {}
-				local name = config.Name or "Dropdown"
+				local dropdownName = config.Name or "Dropdown"
 				local options = config.Options or {"Option1"}
 				local default = config.CurrentOption or options[1]
 				local callback = config.Callback or function() end
 				
 				local dropdownFrame = create("Frame", {
+					Name = dropdownName,
 					Size = UDim2.new(1, 0, 0, 25),
 					BackgroundTransparency = 1,
+					LayoutOrder = getNextOrder(),
+					ClipsDescendants = false,
 					Parent = container,
 				})
 				
 				local btn = create("TextButton", {
-					Size = UDim2.new(1, 0, 1, 0),
+					Size = UDim2.new(1, 0, 0, 25),
 					BackgroundColor3 = theme.secondary,
 					BorderColor3 = theme.border,
 					BorderSizePixel = 1,
-					Text = name .. ": " .. default,
+					Text = dropdownName .. ": " .. default,
 					TextColor3 = theme.text,
 					Font = Enum.Font.Code,
 					TextSize = 11,
@@ -434,13 +478,15 @@ function Library:CreateWindow(config)
 				})
 				
 				create("UIListLayout", {
+					FillDirection = Enum.FillDirection.Vertical,
 					SortOrder = Enum.SortOrder.LayoutOrder,
+					Padding = UDim.new(0, 0),
 					Parent = list,
 				})
 				
 				local selected = default
 				
-				for _, option in options do
+				for i, option in options do
 					local optBtn = create("TextButton", {
 						Size = UDim2.new(1, 0, 0, 22),
 						BackgroundColor3 = theme.secondary,
@@ -449,18 +495,21 @@ function Library:CreateWindow(config)
 						TextColor3 = option == selected and theme.accent or theme.text,
 						Font = Enum.Font.Code,
 						TextSize = 10,
+						LayoutOrder = i,
 						Parent = list,
 					})
 					
 					optBtn.MouseButton1Click:Connect(function()
 						selected = option
-						btn.Text = name .. ": " .. option
+						btn.Text = dropdownName .. ": " .. option
 						list.Visible = false
+						
 						for _, child in list:GetChildren() do
 							if child:IsA("TextButton") then
 								child.TextColor3 = child.Text == selected and theme.accent or theme.text
 							end
 						end
+						
 						callback(option)
 					end)
 				end
@@ -482,6 +531,7 @@ function Library:CreateWindow(config)
 					Font = Enum.Font.Code,
 					TextSize = 11,
 					TextXAlignment = Enum.TextXAlignment.Left,
+					LayoutOrder = getNextOrder(),
 					Parent = container,
 				})
 			end
@@ -491,6 +541,7 @@ function Library:CreateWindow(config)
 					Size = UDim2.new(1, 0, 0, 1),
 					BackgroundColor3 = theme.border,
 					BorderSizePixel = 0,
+					LayoutOrder = getNextOrder(),
 					Parent = container,
 				})
 			end
@@ -515,6 +566,8 @@ function Library:Notify(config)
 	local title = config.Title or "Notification"
 	local content = config.Content or ""
 	local duration = config.Duration or 3
+	
+	if not screenGui then return end
 	
 	local notif = create("Frame", {
 		Size = UDim2.new(0, 250, 0, 60),
