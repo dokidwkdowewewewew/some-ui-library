@@ -50,7 +50,9 @@ local function makeSquare(parent, size, color, filled)
 	})
 end
 
-function UI.Init(title)
+function UI.Init(windowTitle)
+	local title = windowTitle or "UI"
+	
 	screenGui = create("ScreenGui", {
 		Name = "CustomUI",
 		Parent = game.CoreGui,
@@ -148,7 +150,9 @@ function UI.Init(title)
 	return UI
 end
 
-function UI.AddTab(name, icon)
+function UI.AddTab(tabName, icon)
+	local name = tabName or "tab"
+	
 	local btn = create("TextButton", {
 		Size = UDim2.new(1, 0, 0, 50),
 		BackgroundColor3 = theme.secondary,
@@ -198,8 +202,8 @@ function UI.AddTab(name, icon)
 	
 	return {
 		Section = section,
-		AddGroup = function(_, title)
-			title = title or "group"
+		AddGroup = function(_, groupTitle)
+			local title = groupTitle or "group"
 			
 			local group = create("Frame", {
 				Name = title,
@@ -212,7 +216,7 @@ function UI.AddTab(name, icon)
 			create("TextLabel", {
 				Size = UDim2.new(1, 0, 0, 20),
 				BackgroundTransparency = 1,
-				Text = title:upper(),
+				Text = tostring(title):upper(),
 				TextColor3 = theme.text,
 				Font = Enum.Font.Code,
 				TextSize = 12,
@@ -237,6 +241,8 @@ function UI.AddTab(name, icon)
 			
 			return {
 				AddToggle = function(_, name, callback)
+					name = name or "toggle"
+					
 					local toggleFrame = create("Frame", {
 						Size = UDim2.new(1, 0, 0, 20),
 						BackgroundTransparency = 1,
@@ -283,6 +289,11 @@ function UI.AddTab(name, icon)
 				end,
 				
 				AddSlider = function(_, name, min, max, default, callback)
+					name = name or "slider"
+					min = min or 0
+					max = max or 100
+					default = default or 50
+					
 					local sliderFrame = create("Frame", {
 						Size = UDim2.new(1, 0, 0, 35),
 						BackgroundTransparency = 1,
@@ -363,6 +374,8 @@ function UI.AddTab(name, icon)
 				end,
 				
 				AddButton = function(_, name, callback)
+					name = name or "button"
+					
 					local btnFrame = create("TextButton", {
 						Size = UDim2.new(1, 0, 0, 25),
 						BackgroundColor3 = theme.secondary,
@@ -383,6 +396,9 @@ function UI.AddTab(name, icon)
 				end,
 				
 				AddDropdown = function(_, name, options, default, callback)
+					name = name or "dropdown"
+					options = options or {"option1"}
+					
 					local dropdownFrame = create("Frame", {
 						Size = UDim2.new(1, 0, 0, 25),
 						BackgroundTransparency = 1,
@@ -452,6 +468,8 @@ function UI.AddTab(name, icon)
 				end,
 				
 				AddColorPicker = function(_, name, default, callback)
+					name = name or "color"
+					
 					local colorFrame = create("Frame", {
 						Size = UDim2.new(1, 0, 0, 20),
 						BackgroundTransparency = 1,
@@ -494,6 +512,8 @@ function UI.AddTab(name, icon)
 				end,
 				
 				AddKeybind = function(_, name, default, callback)
+					name = name or "keybind"
+					
 					local keybindFrame = create("Frame", {
 						Size = UDim2.new(1, 0, 0, 20),
 						BackgroundTransparency = 1,
@@ -560,6 +580,8 @@ function UI.AddTab(name, icon)
 				end,
 				
 				AddLabel = function(_, text)
+					text = text or "label"
+					
 					create("TextLabel", {
 						Size = UDim2.new(1, 0, 0, 18),
 						BackgroundTransparency = 1,
@@ -586,7 +608,10 @@ function UI.Destroy()
 	end
 end
 
-function UI.Notify(title, text, duration)
+function UI.Notify(notifTitle, notifText, duration)
+	local title = notifTitle or "notification"
+	local text = notifText or ""
+	
 	local notif = create("Frame", {
 		Size = UDim2.new(0, 250, 0, 60),
 		Position = UDim2.new(1, -260, 1, -70),
