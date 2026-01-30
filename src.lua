@@ -621,7 +621,7 @@ function library.new(library_title, cfg_location)
 						end)
 					elseif type == "Dropdown" then
 						Border.Size = Border.Size + UDim2.new(0, 0, 0, 35)
-						value = {Dropdown = default and default.Dropdown or data.options[1]}
+						value = {Dropdown = default and default.Dropdown or (data.options and data.options[1] or "None")}
 						local options = data.options or {"None"}
 
 						local DropdownFrame = library:create("Frame", {
@@ -775,23 +775,17 @@ function library.new(library_title, cfg_location)
 					elseif type == "Label" then
 						Border.Size = Border.Size + UDim2.new(0, 0, 0, 15)
 
-						local LabelFrame = library:create("Frame", {
-							Name = "LabelFrame",
-							BackgroundTransparency = 1,
-							Size = UDim2.new(1, 0, 0, 15),
-						}, Container)
-
 						library:create("TextLabel", {
 							Name = "Label",
 							BackgroundTransparency = 1,
-							Position = UDim2.new(0, 9, 0, 3),
-							Size = UDim2.new(1, -18, 1, 0),
+							Position = UDim2.new(0, 9, 0, 0),
+							Size = UDim2.new(1, -18, 0, 15),
 							Font = Enum.Font.Ubuntu,
 							Text = text,
 							TextColor3 = Color3.fromRGB(200, 200, 200),
 							TextSize = 13,
 							TextXAlignment = Enum.TextXAlignment.Left,
-						}, LabelFrame)
+						}, Container)
 					end
 
 					return element
