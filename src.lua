@@ -197,7 +197,7 @@ function library.new(library_title, cfg_location)
 			BackgroundTransparency = 1,
 			Position = UDim2.new(0, 0, 0, 29),
 			Size = UDim2.new(1, 0, 0, 418),
-		}, Tab)
+		}, TabFrames)
 
 		if is_first_tab then
 			is_first_tab = false
@@ -619,6 +619,179 @@ function library.new(library_title, cfg_location)
 							library:tween(Button, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BorderColor3 = Color3.fromRGB(0, 0, 0)})
 							do_callback()
 						end)
+					elseif type == "Dropdown" then
+						Border.Size = Border.Size + UDim2.new(0, 0, 0, 35)
+						value = {Dropdown = default and default.Dropdown or data.options[1]}
+						local options = data.options or {"None"}
+
+						local DropdownFrame = library:create("Frame", {
+							Name = "DropdownFrame",
+							BackgroundTransparency = 1,
+							Size = UDim2.new(1, 0, 0, 35),
+						}, Container)
+
+						local DropdownText = library:create("TextLabel", {
+							Name = "DropdownText",
+							BackgroundTransparency = 1,
+							Position = UDim2.new(0, 9, 0, 6),
+							Size = UDim2.new(0, 200, 0, 9),
+							Font = Enum.Font.Ubuntu,
+							Text = text,
+							TextColor3 = Color3.fromRGB(150, 150, 150),
+							TextSize = 14,
+							TextXAlignment = Enum.TextXAlignment.Left,
+						}, DropdownFrame)
+
+						local DropdownButton = library:create("TextButton", {
+							Name = "DropdownButton",
+							BackgroundColor3 = Color3.fromRGB(25, 25, 25),
+							BorderColor3 = Color3.fromRGB(0, 0, 0),
+							Position = UDim2.new(0, 9, 0, 20),
+							Size = UDim2.new(0, 260, 0, 10),
+							AutoButtonColor = false,
+							Font = Enum.Font.Ubuntu,
+							Text = value.Dropdown,
+							TextColor3 = Color3.fromRGB(150, 150, 150),
+							TextSize = 12,
+							TextTruncate = Enum.TextTruncate.AtEnd,
+						}, DropdownFrame)
+
+						local DropdownList = library:create("Frame", {
+							Name = "DropdownList",
+							BackgroundColor3 = Color3.fromRGB(15, 15, 15),
+							BorderColor3 = Color3.fromRGB(0, 0, 0),
+							Position = UDim2.new(0, 9, 0, 31),
+							Size = UDim2.new(0, 260, 0, 0),
+							Visible = false,
+							ZIndex = 10,
+						}, DropdownFrame)
+
+						local DropdownListContainer = library:create("ScrollingFrame", {
+							BackgroundTransparency = 1,
+							Size = UDim2.new(1, 0, 1, 0),
+							ScrollBarThickness = 4,
+							ScrollBarImageColor3 = Color3.fromRGB(84, 101, 255),
+							BorderSizePixel = 0,
+							CanvasSize = UDim2.new(0, 0, 0, 0),
+						}, DropdownList)
+
+						library:create("UIListLayout", {
+							HorizontalAlignment = Enum.HorizontalAlignment.Center,
+							SortOrder = Enum.SortOrder.LayoutOrder,
+						}, DropdownListContainer)
+
+						local is_open = false
+						local mouse_in_dropdown = false
+
+						local function update_options(new_options)
+							options = new_options or options
+							for _, child in DropdownListContainer:GetChildren() do
+								if child:IsA("TextButton") then
+									child:Destroy()
+								end
+							end
+
+							for _, option in options do
+								local OptionButton = library:create("TextButton", {
+									BackgroundColor3 = Color3.fromRGB(20, 20, 20),
+									BorderSizePixel = 0,
+									Size = UDim2.new(1, 0, 0, 20),
+									AutoButtonColor = false,
+									Font = Enum.Font.Ubuntu,
+									Text = option,
+									TextColor3 = Color3.fromRGB(150, 150, 150),
+									TextSize = 12,
+									TextTruncate = Enum.TextTruncate.AtEnd,
+								}, DropdownListContainer)
+
+								OptionButton.MouseEnter:Connect(function()
+									library:tween(OptionButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)})
+									library:tween(OptionButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextColor3 = Color3.fromRGB(255, 255, 255)})
+								end)
+
+								OptionButton.MouseLeave:Connect(function()
+									library:tween(OptionButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(20, 20, 20)})
+									library:tween(OptionButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextColor3 = Color3.fromRGB(150, 150, 150)})
+								end)
+
+								OptionButton.MouseButton1Down:Connect(function()
+									value.Dropdown = option
+									DropdownButton.Text = option
+									DropdownList.Visible = false
+									is_open = false
+									Border.Size = Border.Size - UDim2.new(0, 0, 0, math.min(#options * 20, 100))
+									do_callback()
+								end)
+							end
+
+							DropdownListContainer.CanvasSize = UDim2.new(0, 0, 0, #options * 20)
+						end
+
+						DropdownFrame.MouseEnter:Connect(function()
+							mouse_in_dropdown = true
+							library:tween(DropdownText, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextColor3 = Color3.fromRGB(255, 255, 255)})
+							library:tween(DropdownButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextColor3 = Color3.fromRGB(255, 255, 255)})
+						end)
+
+						DropdownFrame.MouseLeave:Connect(function()
+							mouse_in_dropdown = false
+							if not is_open then
+								library:tween(DropdownText, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextColor3 = Color3.fromRGB(150, 150, 150)})
+								library:tween(DropdownButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextColor3 = Color3.fromRGB(150, 150, 150)})
+							end
+						end)
+
+						DropdownButton.MouseButton1Down:Connect(function()
+							is_open = not is_open
+							DropdownList.Visible = is_open
+
+							if is_open then
+								local list_height = math.min(#options * 20, 100)
+								DropdownList.Size = UDim2.new(0, 260, 0, list_height)
+								Border.Size = Border.Size + UDim2.new(0, 0, 0, list_height)
+							else
+								local list_height = math.min(#options * 20, 100)
+								Border.Size = Border.Size - UDim2.new(0, 0, 0, list_height)
+								if not mouse_in_dropdown then
+									library:tween(DropdownText, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextColor3 = Color3.fromRGB(150, 150, 150)})
+									library:tween(DropdownButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextColor3 = Color3.fromRGB(150, 150, 150)})
+								end
+							end
+						end)
+
+						function element:set_value(new_value)
+							value = new_value or value
+							menu.values[tab.tab_num][section_name][sector_name][flag] = value
+							DropdownButton.Text = value.Dropdown
+							do_callback()
+						end
+
+						function element:update_options(new_options)
+							update_options(new_options)
+						end
+
+						update_options()
+						element:set_value(value)
+					elseif type == "Label" then
+						Border.Size = Border.Size + UDim2.new(0, 0, 0, 15)
+
+						local LabelFrame = library:create("Frame", {
+							Name = "LabelFrame",
+							BackgroundTransparency = 1,
+							Size = UDim2.new(1, 0, 0, 15),
+						}, Container)
+
+						library:create("TextLabel", {
+							Name = "Label",
+							BackgroundTransparency = 1,
+							Position = UDim2.new(0, 9, 0, 3),
+							Size = UDim2.new(1, -18, 1, 0),
+							Font = Enum.Font.Ubuntu,
+							Text = text,
+							TextColor3 = Color3.fromRGB(200, 200, 200),
+							TextSize = 13,
+							TextXAlignment = Enum.TextXAlignment.Left,
+						}, LabelFrame)
 					end
 
 					return element
