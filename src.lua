@@ -197,7 +197,7 @@ function library.new(library_title, cfg_location)
 			BackgroundTransparency = 1,
 			Position = UDim2.new(0, 0, 0, 29),
 			Size = UDim2.new(1, 0, 0, 418),
-		}, TabFrames)
+		}, Tab)
 
 		if is_first_tab then
 			is_first_tab = false
