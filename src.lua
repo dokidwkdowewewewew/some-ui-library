@@ -120,15 +120,18 @@ local Title = library:create("TextLabel", {
 	Name = "Title",
 	AnchorPoint = Vector2.new(0.5, 0),
 	BackgroundTransparency = 1,
-	Position = UDim2.new(0.5, 0, 0, 0),
-	Size = UDim2.new(1, -22, 0, 30),
+	Position = UDim2.new(0.5, 0, 0, 6),
+	Size = UDim2.new(0, 0, 0, 30), -- 👈 no full-width
+	AutomaticSize = Enum.AutomaticSize.X, -- 👈 key part
 	Font = Enum.Font.Ubuntu,
 	Text = library_title,
 	TextColor3 = Color3.fromRGB(255, 255, 255),
 	TextSize = 16,
-	TextXAlignment = Enum.TextXAlignment.Center, -- ← THIS
+	TextXAlignment = Enum.TextXAlignment.Center,
+	TextYAlignment = Enum.TextYAlignment.Center,
 	RichText = true,
 }, Main)
+
 
 
 	local TabButtons = library:create("Frame", {
