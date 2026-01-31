@@ -116,23 +116,20 @@ function library.new(library_title, cfg_location)
 	}, ScreenGui)
 
 	library:set_draggable(Main)
-local Title = library:create("TextLabel", {
-	Name = "Title",
-	AnchorPoint = Vector2.new(0.5, 0),
-	BackgroundTransparency = 1,
-	Position = UDim2.new(0.5, 0, 0, 6),
-	Size = UDim2.new(0, 0, 0, 30),
-	AutomaticSize = Enum.AutomaticSize.X, 
-	Font = Enum.Font.Ubuntu,
-	Text = library_title,
-	TextColor3 = Color3.fromRGB(255, 255, 255),
-	TextSize = 16,
-	TextXAlignment = Enum.TextXAlignment.Center,
-	TextYAlignment = Enum.TextYAlignment.Center,
-	RichText = true,
-}, Main)
 
-
+	local Title = library:create("TextLabel", {
+		Name = "Title",
+		AnchorPoint = Vector2.new(0.5, 0),
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0.5, 0, 0, 0),
+		Size = UDim2.new(1, -22, 0, 30),
+		Font = Enum.Font.Ubuntu,
+		Text = library_title,
+		TextColor3 = Color3.fromRGB(255, 255, 255),
+		TextSize = 16,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		RichText = true,
+	}, Main)
 
 	local TabButtons = library:create("Frame", {
 		Name = "TabButtons",
@@ -466,6 +463,494 @@ local Title = library:create("TextLabel", {
 						end)
 
 						element:set_value(value)
+
+						function element:add_color_picker(picker_data)
+							picker_data = picker_data or {}
+							local picker = {}
+							picker.value = picker_data.default or Color3.fromRGB(255, 255, 255)
+							picker.callback = picker_data.callback or function() end
+
+							local DisplayFrame = library:create("Frame", {
+								BackgroundColor3 = picker.value,
+								BorderColor3 = Color3.new(0, 0, 0),
+								Size = UDim2.new(0, 28, 0, 14),
+								Position = UDim2.new(1, -32, 0, 2),
+								ZIndex = 6,
+								Parent = ToggleButton,
+							})
+
+							local PickerOuter = library:create("Frame", {
+								Name = "ColorPicker",
+								BackgroundColor3 = Color3.new(0, 0, 0),
+								BorderColor3 = Color3.new(0, 0, 0),
+								Position = UDim2.fromOffset(DisplayFrame.AbsolutePosition.X, DisplayFrame.AbsolutePosition.Y + 18),
+								Size = UDim2.fromOffset(200, 225),
+								Visible = false,
+								ZIndex = 15,
+								Parent = ScreenGui,
+							})
+
+							DisplayFrame:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+								PickerOuter.Position = UDim2.fromOffset(DisplayFrame.AbsolutePosition.X, DisplayFrame.AbsolutePosition.Y + 18)
+							end)
+
+							local PickerInner = library:create("Frame", {
+								BackgroundColor3 = Color3.fromRGB(15, 15, 15),
+								BorderColor3 = Color3.fromRGB(30, 30, 30),
+								BorderMode = Enum.BorderMode.Inset,
+								Size = UDim2.new(1, 0, 1, 0),
+								ZIndex = 16,
+								Parent = PickerOuter,
+							})
+
+							local SatVibOuter = library:create("Frame", {
+								BorderColor3 = Color3.new(0, 0, 0),
+								Position = UDim2.new(0, 4, 0, 4),
+								Size = UDim2.new(0, 175, 0, 175),
+								ZIndex = 17,
+								Parent = PickerInner,
+							})
+
+							local SatVibInner = library:create("Frame", {
+								BackgroundColor3 = Color3.fromRGB(15, 15, 15),
+								BorderColor3 = Color3.fromRGB(30, 30, 30),
+								BorderMode = Enum.BorderMode.Inset,
+								Size = UDim2.new(1, 0, 1, 0),
+								ZIndex = 18,
+								Parent = SatVibOuter,
+							})
+
+							local SatVibMap = library:create("ImageLabel", {
+								BorderSizePixel = 0,
+								Size = UDim2.new(1, 0, 1, 0),
+								ZIndex = 18,
+								Image = "rbxassetid://4155801252",
+								Parent = SatVibInner,
+							})
+
+							local Cursor = library:create("ImageLabel", {
+								AnchorPoint = Vector2.new(0.5, 0.5),
+								Size = UDim2.new(0, 6, 0, 6),
+								BackgroundTransparency = 1,
+								Image = "http://www.roblox.com/asset/?id=9619665977",
+								ImageColor3 = Color3.new(0, 0, 0),
+								ZIndex = 19,
+								Parent = SatVibMap,
+							})
+
+							library:create("ImageLabel", {
+								Size = UDim2.new(0, 4, 0, 4),
+								Position = UDim2.new(0, 1, 0, 1),
+								BackgroundTransparency = 1,
+								Image = "http://www.roblox.com/asset/?id=9619665977",
+								ZIndex = 20,
+								Parent = Cursor,
+							})
+
+							local HueOuter = library:create("Frame", {
+								BorderColor3 = Color3.new(0, 0, 0),
+								Position = UDim2.new(0, 183, 0, 4),
+								Size = UDim2.new(0, 13, 0, 175),
+								ZIndex = 17,
+								Parent = PickerInner,
+							})
+
+							local HueInner = library:create("Frame", {
+								BackgroundColor3 = Color3.new(1, 1, 1),
+								BorderSizePixel = 0,
+								Size = UDim2.new(1, 0, 1, 0),
+								ZIndex = 18,
+								Parent = HueOuter,
+							})
+
+							local HueCursor = library:create("Frame", {
+								BackgroundColor3 = Color3.new(1, 1, 1),
+								AnchorPoint = Vector2.new(0, 0.5),
+								BorderColor3 = Color3.new(0, 0, 0),
+								Size = UDim2.new(1, 0, 0, 1),
+								ZIndex = 18,
+								Parent = HueInner,
+							})
+
+							local sequence = {}
+							for hue = 0, 1, 0.1 do
+								table.insert(sequence, ColorSequenceKeypoint.new(hue, Color3.fromHSV(hue, 1, 1)))
+							end
+
+							library:create("UIGradient", {
+								Color = ColorSequence.new(sequence),
+								Rotation = 90,
+								Parent = HueInner,
+							})
+
+							local HexBox = library:create("TextBox", {
+								BackgroundColor3 = Color3.fromRGB(25, 25, 25),
+								BorderColor3 = Color3.fromRGB(0, 0, 0),
+								Position = UDim2.fromOffset(4, 183),
+								Size = UDim2.new(0.5, -6, 0, 18),
+								Font = Enum.Font.Ubuntu,
+								PlaceholderText = "Hex",
+								Text = "#FFFFFF",
+								TextColor3 = Color3.fromRGB(200, 200, 200),
+								TextSize = 12,
+								TextXAlignment = Enum.TextXAlignment.Left,
+								ZIndex = 20,
+								Parent = PickerInner,
+							})
+
+							library:create("UIPadding", {
+								PaddingLeft = UDim.new(0, 4),
+								Parent = HexBox,
+							})
+
+							local RgbBox = library:create("TextBox", {
+								BackgroundColor3 = Color3.fromRGB(25, 25, 25),
+								BorderColor3 = Color3.fromRGB(0, 0, 0),
+								Position = UDim2.new(0.5, 2, 0, 183),
+								Size = UDim2.new(0.5, -6, 0, 18),
+								Font = Enum.Font.Ubuntu,
+								PlaceholderText = "RGB",
+								Text = "255, 255, 255",
+								TextColor3 = Color3.fromRGB(200, 200, 200),
+								TextSize = 12,
+								TextXAlignment = Enum.TextXAlignment.Left,
+								ZIndex = 20,
+								Parent = PickerInner,
+							})
+
+							library:create("UIPadding", {
+								PaddingLeft = UDim.new(0, 4),
+								Parent = RgbBox,
+							})
+
+							local CopyBtn = library:create("TextButton", {
+								BackgroundColor3 = Color3.fromRGB(25, 25, 25),
+								BorderColor3 = Color3.fromRGB(0, 0, 0),
+								Position = UDim2.fromOffset(4, 205),
+								Size = UDim2.new(1, -8, 0, 16),
+								Font = Enum.Font.Ubuntu,
+								Text = "Copy Hex",
+								TextColor3 = Color3.fromRGB(150, 150, 150),
+								TextSize = 12,
+								ZIndex = 20,
+								Parent = PickerInner,
+							})
+
+							local h, s, v = 1, 1, 1
+
+							local function update_display()
+								local color = Color3.fromHSV(h, s, v)
+								picker.value = color
+								DisplayFrame.BackgroundColor3 = color
+								SatVibMap.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
+								Cursor.Position = UDim2.new(s, 0, 1 - v, 0)
+								HueCursor.Position = UDim2.new(0, 0, h, 0)
+								HexBox.Text = "#" .. color:ToHex()
+								RgbBox.Text = string.format("%d, %d, %d", 
+									math.floor(color.R * 255),
+									math.floor(color.G * 255),
+									math.floor(color.B * 255)
+								)
+								picker.callback(color)
+							end
+
+							SatVibMap.InputBegan:Connect(function(input)
+								if input.UserInputType == Enum.UserInputType.MouseButton1 then
+									while uis:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
+										local minX = SatVibMap.AbsolutePosition.X
+										local maxX = minX + SatVibMap.AbsoluteSize.X
+										local minY = SatVibMap.AbsolutePosition.Y
+										local maxY = minY + SatVibMap.AbsoluteSize.Y
+										s = math.clamp((mouse.X - minX) / (maxX - minX), 0, 1)
+										v = 1 - math.clamp((mouse.Y - minY) / (maxY - minY), 0, 1)
+										update_display()
+										rs.RenderStepped:Wait()
+									end
+								end
+							end)
+
+							HueInner.InputBegan:Connect(function(input)
+								if input.UserInputType == Enum.UserInputType.MouseButton1 then
+									while uis:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
+										local minY = HueInner.AbsolutePosition.Y
+										local maxY = minY + HueInner.AbsoluteSize.Y
+										h = math.clamp((mouse.Y - minY) / (maxY - minY), 0, 1)
+										update_display()
+										rs.RenderStepped:Wait()
+									end
+								end
+							end)
+
+							HexBox.FocusLost:Connect(function()
+								local success, result = pcall(Color3.fromHex, HexBox.Text)
+								if success then
+									h, s, v = Color3.toHSV(result)
+									update_display()
+								end
+							end)
+
+							RgbBox.FocusLost:Connect(function()
+								local r, g, b = RgbBox.Text:match("(%d+),%s*(%d+),%s*(%d+)")
+								if r and g and b then
+									h, s, v = Color3.toHSV(Color3.fromRGB(r, g, b))
+									update_display()
+								end
+							end)
+
+							CopyBtn.MouseButton1Click:Connect(function()
+								if setclipboard then
+									setclipboard(picker.value:ToHex())
+								end
+							end)
+
+							DisplayFrame.InputBegan:Connect(function(input)
+								if input.UserInputType == Enum.UserInputType.MouseButton1 then
+									PickerOuter.Visible = not PickerOuter.Visible
+								end
+							end)
+
+							uis.InputBegan:Connect(function(input)
+								if input.UserInputType == Enum.UserInputType.MouseButton1 and PickerOuter.Visible then
+									local pos = PickerOuter.AbsolutePosition
+									local size = PickerOuter.AbsoluteSize
+									if mouse.X < pos.X or mouse.X > pos.X + size.X or
+										mouse.Y < pos.Y or mouse.Y > pos.Y + size.Y then
+										PickerOuter.Visible = false
+									end
+								end
+							end)
+
+							h, s, v = Color3.toHSV(picker.value)
+							update_display()
+
+							return picker
+						end
+
+					elseif type == "Dropdown" then
+						Border.Size = Border.Size + UDim2.new(0, 0, 0, 35)
+						value = {Dropdown = default and default.default or ""}
+
+						local options = data.options or {}
+						local multi = data.multi or false
+
+						if multi then
+							value.Dropdown = {}
+						end
+
+						local DropdownFrame = library:create("Frame", {
+							Name = "Dropdown",
+							BackgroundTransparency = 1,
+							Size = UDim2.new(1, 0, 0, 35),
+						}, Container)
+
+						local DropdownText = library:create("TextLabel", {
+							BackgroundTransparency = 1,
+							Position = UDim2.new(0, 9, 0, 3),
+							Size = UDim2.new(1, -18, 0, 12),
+							Font = Enum.Font.Ubuntu,
+							Text = text,
+							TextColor3 = Color3.fromRGB(150, 150, 150),
+							TextSize = 14,
+							TextXAlignment = Enum.TextXAlignment.Left,
+						}, DropdownFrame)
+
+						local DropdownButton = library:create("TextButton", {
+							BackgroundColor3 = Color3.fromRGB(25, 25, 25),
+							BorderColor3 = Color3.fromRGB(0, 0, 0),
+							Position = UDim2.new(0, 9, 0, 18),
+							Size = UDim2.new(0, 252, 0, 16),
+							AutoButtonColor = false,
+							Font = Enum.Font.Ubuntu,
+							Text = multi and "..." or (value.Dropdown or "..."),
+							TextColor3 = Color3.fromRGB(150, 150, 150),
+							TextSize = 13,
+							ZIndex = 6,
+						}, DropdownFrame)
+
+						local Arrow = library:create("TextLabel", {
+							BackgroundTransparency = 1,
+							Position = UDim2.new(1, -14, 0, 0),
+							Size = UDim2.new(0, 14, 1, 0),
+							Font = Enum.Font.Ubuntu,
+							Text = "v",
+							TextColor3 = Color3.fromRGB(150, 150, 150),
+							TextSize = 12,
+							ZIndex = 7,
+							Parent = DropdownButton,
+						})
+
+						local ListOuter = library:create("Frame", {
+							BackgroundColor3 = Color3.new(0, 0, 0),
+							BorderColor3 = Color3.new(0, 0, 0),
+							Position = UDim2.fromOffset(DropdownButton.AbsolutePosition.X, DropdownButton.AbsolutePosition.Y + 18),
+							Size = UDim2.fromOffset(252, 0),
+							Visible = false,
+							ZIndex = 20,
+							Parent = ScreenGui,
+						})
+
+						DropdownButton:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+							ListOuter.Position = UDim2.fromOffset(DropdownButton.AbsolutePosition.X, DropdownButton.AbsolutePosition.Y + 18)
+						end)
+
+						local ListInner = library:create("Frame", {
+							BackgroundColor3 = Color3.fromRGB(15, 15, 15),
+							BorderColor3 = Color3.fromRGB(30, 30, 30),
+							BorderMode = Enum.BorderMode.Inset,
+							Size = UDim2.new(1, 0, 1, 0),
+							ZIndex = 21,
+							Parent = ListOuter,
+						})
+
+						local Scrolling = library:create("ScrollingFrame", {
+							BackgroundTransparency = 1,
+							BorderSizePixel = 0,
+							Size = UDim2.new(1, 0, 1, 0),
+							CanvasSize = UDim2.new(0, 0, 0, 0),
+							ScrollBarThickness = 3,
+							ScrollBarImageColor3 = Color3.fromRGB(84, 101, 255),
+							ZIndex = 21,
+							Parent = ListInner,
+						})
+
+						library:create("UIListLayout", {
+							Parent = Scrolling,
+						})
+
+						local function update_text()
+							if multi then
+								local selected = {}
+								for option, enabled in value.Dropdown do
+									if enabled then
+										table.insert(selected, option)
+									end
+								end
+								DropdownButton.Text = #selected > 0 and table.concat(selected, ", ") or "..."
+							else
+								DropdownButton.Text = value.Dropdown or "..."
+							end
+						end
+
+						local function build_list()
+							for _, child in Scrolling:GetChildren() do
+								if not child:IsA("UIListLayout") then
+									child:Destroy()
+								end
+							end
+
+							local count = 0
+							for _, option in options do
+								count += 1
+								local OptionBtn = library:create("TextButton", {
+									BackgroundColor3 = Color3.fromRGB(15, 15, 15),
+									BorderColor3 = Color3.fromRGB(30, 30, 30),
+									Size = UDim2.new(1, 0, 0, 18),
+									Font = Enum.Font.Ubuntu,
+									Text = option,
+									TextColor3 = Color3.fromRGB(150, 150, 150),
+									TextSize = 13,
+									TextXAlignment = Enum.TextXAlignment.Left,
+									ZIndex = 22,
+									Parent = Scrolling,
+								})
+
+								library:create("UIPadding", {
+									PaddingLeft = UDim.new(0, 4),
+									Parent = OptionBtn,
+								})
+
+								local function update_option()
+									local selected = multi and value.Dropdown[option] or value.Dropdown == option
+									OptionBtn.TextColor3 = selected and Color3.fromRGB(84, 101, 255) or Color3.fromRGB(150, 150, 150)
+								end
+
+								OptionBtn.MouseButton1Click:Connect(function()
+									if multi then
+										value.Dropdown[option] = not value.Dropdown[option]
+									else
+										value.Dropdown = option
+										ListOuter.Visible = false
+										for _, btn in Scrolling:GetChildren() do
+											if btn:IsA("TextButton") then
+												btn.TextColor3 = Color3.fromRGB(150, 150, 150)
+											end
+										end
+									end
+									update_option()
+									update_text()
+									do_callback()
+								end)
+
+								OptionBtn.MouseEnter:Connect(function()
+									if not (multi and value.Dropdown[option] or value.Dropdown == option) then
+										OptionBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+									end
+								end)
+
+								OptionBtn.MouseLeave:Connect(function()
+									update_option()
+								end)
+
+								update_option()
+							end
+
+							Scrolling.CanvasSize = UDim2.new(0, 0, 0, count * 18)
+							local height = math.min(count * 18, 144)
+							ListOuter.Size = UDim2.fromOffset(252, height)
+						end
+
+						DropdownButton.MouseButton1Click:Connect(function()
+							ListOuter.Visible = not ListOuter.Visible
+							if ListOuter.Visible then
+								build_list()
+							end
+						end)
+
+						DropdownButton.MouseEnter:Connect(function()
+							library:tween(DropdownText, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(255, 255, 255)})
+							library:tween(DropdownButton, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(255, 255, 255)})
+						end)
+
+						DropdownButton.MouseLeave:Connect(function()
+							library:tween(DropdownText, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(150, 150, 150)})
+							library:tween(DropdownButton, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(150, 150, 150)})
+						end)
+
+						uis.InputBegan:Connect(function(input)
+							if input.UserInputType == Enum.UserInputType.MouseButton1 and ListOuter.Visible then
+								local pos = ListOuter.AbsolutePosition
+								local size = ListOuter.AbsoluteSize
+								if mouse.X < pos.X or mouse.X > pos.X + size.X or
+									mouse.Y < pos.Y or mouse.Y > pos.Y + size.Y then
+									if mouse.X < DropdownButton.AbsolutePosition.X or 
+										mouse.X > DropdownButton.AbsolutePosition.X + DropdownButton.AbsoluteSize.X or
+										mouse.Y < DropdownButton.AbsolutePosition.Y or
+										mouse.Y > DropdownButton.AbsolutePosition.Y + DropdownButton.AbsoluteSize.Y then
+										ListOuter.Visible = false
+									end
+								end
+							end
+						end)
+
+						function element:set_value(new_value)
+							value = new_value or value
+							menu.values[tab.tab_num][section_name][sector_name][flag] = value
+							update_text()
+							do_callback()
+						end
+
+						function element:refresh(new_options)
+							options = new_options
+							if not multi then
+								value.Dropdown = ""
+							else
+								value.Dropdown = {}
+							end
+							update_text()
+						end
+
+						update_text()
+
 					elseif type == "Slider" then
 						Border.Size = Border.Size + UDim2.new(0, 0, 0, 35)
 						value = {Slider = default and default.default or 0}
